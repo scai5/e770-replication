@@ -4,7 +4,7 @@
 # ECON 770 HE replication project based on Markowitz et al. (2017) 
 # Replication by  Shirley Cai 
 # Date created:   10/20/2023 
-# Last edited:    10/23/2023
+# Last edited:    10/25/2023
 
 # Covariate correlation matrix -------------------------------------------------
 
@@ -156,8 +156,62 @@ tab_6 <- tab_6 %>%
   tab_spanner(label = 'Birth weight', columns = 2:4) %>% 
   opt_horizontal_padding(scale = 3)
 
+# Getting vif ------------------------------------------------------------------
+
+varlist <- c("Deitc", "dmage", "Dmar", "Dcfemale", 
+             "Dblack", "Dnativeam", "Dasian", "Dhisp", "Dlehs", 
+             "Dhispunknown", "Dcntrspop500t1000", "Dcntrspop250t500", 
+             "Dcntrspop100t250", "unemp", 
+             "rpcinc", "pctpoverty", "supplyMD_pc")
+varnames <- c("Has state EITC", "Maternal age", "Married", "Female baby", 
+              "Black", "Native American", "Asian", "Hispanic", "Less than high school", 
+              "Hispanic ethnicity unknown", "County pop. 500,000 - 1,000,000",
+              "County pop. 250,000 - 500,000", "County pop. 100,000 - 250,000", 
+              "Unemployment", "Real income per capita", 
+              "Percent poverty", "Primary care physicians per cap.")
+
+getFormula <- function(outcome){
+  fml_string <- paste(outcome, 
+                      paste(varlist, collapse = " + "), 
+                      sep = " ~ ")
+  return(as.formula(fml_string))
+}
+
+vif_tbl <- data.frame(Variable = varnames) 
+
+Dfirsttri_ols <- lm(getFormula("Dfirsttri"), data = df)
+vif_tbl$Dfirsttri <- vif(Dfirsttri_ols)
+
+Dsmoke_ols <- lm(getFormula("Dsmoke"), data = df)
+vif_tbl$Dsmoke <- vif(Dsmoke_ols)
+
+birwt_ols <- lm(getFormula("birwt"), data = df)
+vif_tbl$birwt <- vif(birwt_ols)
+
+lowbirwt_ols <- lm(getFormula("lowbirwt"), data = df)
+vif_tbl$lowbirwt <- vif(lowbirwt_ols)
+
+gestat_ols <- lm(getFormula("gestat"), data = df)
+vif_tbl$gestat <- vif(gestat_ols)
+
+colnames(vif_tbl) <- c("Variable", 
+                       "1st trimester prenatal care", "Smoked during pregnancy", 
+                       "Birth weight", "Birth weight < 2500 g", "Gestation weeks")
+
+tab_vif <- gt(vif_tbl) %>% 
+  tab_header(
+    title = md("**Table 7: Variance Inflation Factors**")
+  ) %>%
+  tab_source_note(
+    source_note = "VIFs computed from a pooled OLS regression with an intercept.  
+                   Sample restricted to singleton births by mothers age 18 or older with high school education or less."
+  ) %>% 
+  opt_horizontal_padding(scale = 3)
+
 # Export -----------------------------------------------------------------------
 
 gtsave(tab_6, "./results/q2d-robustness.html")
 gtsave(tab_6, "./results/q2d-robustness.docx")
+gtsave(tab_vif, "./results/q2d-vif.html")
+gtsave(tab_vif, "./results/q2d-vif.docx")
 rm(list=setdiff(ls(), "df"))

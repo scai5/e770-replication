@@ -4,7 +4,7 @@
 # ECON 770 HE replication project based on Markowitz et al. (2017) 
 # Replication by  Shirley Cai 
 # Date created:   10/19/2023 
-# Last edited:    10/23/2023
+# Last edited:    10/25/2023
 
 # Rerunning regressions --------------------------------------------------------
 
@@ -66,9 +66,9 @@ rm(getFormula)
 
 # Format table -----------------------------------------------------------------
 
-models <- list("Probit 1" = firsttri_fe,  "Marginal effects 1" = firsttri_me,
+models <- list("Probit 1" = firsttri_fe,  "Probit ME 1" = firsttri_me,
                "LPM 1" = firsttri_lpm,
-               "Probit 2" = lowbirwt_fe, "Marginal effects 2" = lowbirwt_me, 
+               "Probit 2" = lowbirwt_fe, "Probit ME 2" = lowbirwt_me, 
                "LPM 2" = lowbirwt_lpm)
 
 gof_map <- tribble(
